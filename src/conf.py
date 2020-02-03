@@ -11,3 +11,5 @@ class settings:
         PGDBNAME: str = os.environ["PGDBNAME"]
         PGUSER: str = os.environ["PGUSER"]
         PGPASSWORD: str = os.environ["PGPASSWORD"]
+
+    REDIS_URL: str = os.environ["REDIS_URL"]

@@ -7,6 +7,10 @@ ROUTER = {
         "url": "/account",
         "GET": "request_handle.redeem_product",
     },
+    "task": {
+        "url": "/task/{task_id}",
+        "GET": "request_handle.get_task",
+    },
 }
 
 

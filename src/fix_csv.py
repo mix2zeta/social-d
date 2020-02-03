@@ -1,6 +1,28 @@
 import csv
 import arrow 
+from database import get_connection
+import psycopg2
 
+from conf import settings
+
+
+def aasync_ja(hash):
+    # Connect to an existing database
+    conn = get_connection()
+
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
+
+    # Execute a command: this creates a new table
+    cur.execute("INSERT INTO file VALUES ('7', %s);", [hash])
+
+    # Make the changes to the database persistent
+    conn.commit()
+
+    # Close communication with the database
+    cur.close()
+    conn.close()
+    print('yo')
 
 def read_csv():
     with open('raw_data/raw_10.csv', 'rU') as csv_file:

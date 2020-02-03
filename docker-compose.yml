@@ -14,6 +14,7 @@ services:
       - social-d-db
     environment:
       PYTHONPATH: /usr/src
+      REDIS_URL: redis://social-d-redis:6379
       BASE_URL: "http://localhost:7901"
       PGHOST: social-d-db
       PGPORT: 5432
@@ -25,7 +26,7 @@ services:
     image: social-d-service:${TAG:-latest}
     build: .
     container_name: social-d-worker
-    command: "python"
+    command: "rq worker -u redis://social-d-redis:6379"
     volumes:
       - ./src:/usr/src
     ports:
@@ -34,6 +35,7 @@ services:
       - social-d-db
     environment:
       PYTHONPATH: /usr/src
+      REDIS_URL: redis://social-d-redis:6379
       BASE_URL: "http://localhost:7901"
       PGHOST: social-d-db
       PGPORT: 5432

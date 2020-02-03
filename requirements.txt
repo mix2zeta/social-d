@@ -5,6 +5,7 @@ simplejson
 arrow
 jinja2
 pythainlp
+psycopg2-binary
 
 # dev package
 pytest
