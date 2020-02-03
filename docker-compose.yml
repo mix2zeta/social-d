@@ -1,0 +1,82 @@
+version: '3.7'
+services:
+
+  social-d-service:
+    image: social-d-service:${TAG:-latest}
+    build: .
+    container_name: social-d-service
+    command: "python -u /usr/src/server.py"
+    volumes:
+      - ./src:/usr/src
+    ports:
+      - "1111:80"
+    depends_on:
+      - social-d-db
+    environment:
+      PYTHONPATH: /usr/src
+      BASE_URL: "http://localhost:7901"
+      PGHOST: social-d-db
+      PGPORT: 5432
+      PGDBNAME: social_service
+      PGUSER: social
+      PGPASSWORD: password
+
+  social-d-worker:
+    image: social-d-service:${TAG:-latest}
+    build: .
+    container_name: social-d-worker
+    command: "python"
+    volumes:
+      - ./src:/usr/src
+    ports:
+      - "1112:80"
+    depends_on:
+      - social-d-db
+    environment:
+      PYTHONPATH: /usr/src
+      BASE_URL: "http://localhost:7901"
+      PGHOST: social-d-db
+      PGPORT: 5432
+      PGDBNAME: social_service
+      PGUSER: social
+      PGPASSWORD: password
+
+  social-d-redis:
+    image: redis:5
+    container_name: social-d-redis
+    # volumes:
+    #   - ./src:/usr/src
+    #   - ./raw_data:/usr/src/raw_data
+    environment:
+      PYTHONPATH: /usr/src
+      BASE_URL: "http://localhost:7901"
+      PGHOST: social-d-db
+      PGPORT: 5432
+      PGDBNAME: social_service
+      PGUSER: social
+      PGPASSWORD: password
+
+  social-d-db:
+    image: postgres:12
+    container_name: social-d-db
+    volumes:
+      - "./schema:/app/schema"
+      - "../postgres/social-d-db/data:/var/lib/postgresql/data"
+    logging:
+      options:
+        max-size: 10m
+        max-file: "10"
+    environment:
+      PGHOST: social-d-db
+      PGPORT: 5432
+      PGDBNAME: social_service
+      PGUSER: social
+      PGPASSWORD: password
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "social", "-d", "social_service"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    restart: on-failure
+
+

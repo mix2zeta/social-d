@@ -1,0 +1,8 @@
+aiohttp
+asyncpg
+rq
+
+# dev package
+pytest
+pytest-cov
+ipdb
