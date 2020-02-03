@@ -1,6 +1,7 @@
 aiohttp
 asyncpg
 rq
+simplejson
 
 # dev package
 pytest

@@ -3,31 +3,10 @@ import urllib.parse
 from conf import settings
 
 ROUTER = {
-    "root": {"url": "/", "GET": "controller.index"},
-    "account": {"url": "/account/{identity_id}", "GET": "account.account.get_account"},
     "link-request": {
-        "url": "/account/{identity_id}/link-request",
-        "POST": "account.link.link_request",
+        "url": "/account",
+        "GET": "request_handle.redeem_product",
     },
-    "redemption-request": {
-        "url": "/account/{identity_id}/redemption-request",
-        "GET": "account.redemption.get_request_redemption_list",
-        "POST": "account.redemption.redemption_request",
-    },
-    "redemption": {
-        "url": "/account/{identity_id}/redemption/{receipt_number}",
-        "GET": "account.redemption.get_redemption_detail",
-        "PUT": "account.redemption.redeem_product",
-    },
-    "link": {
-        "url": "/account/{identity_id}/link/{member_number}",
-        "GET": "controller.index",
-        "PUT": "account.otp.verify_otp_handler",
-    },
-    "health-checking":{
-        "url": "/system/health",
-        "GET": "controller.health",
-    }
 }
 
 

@@ -11,8 +11,3 @@ class settings:
         PGDBNAME: str = os.environ["PGDBNAME"]
         PGUSER: str = os.environ["PGUSER"]
         PGPASSWORD: str = os.environ["PGPASSWORD"]
-
-    @dataclass
-    class APP:
-        HOST: str = "0.0.0.0"
-        PORT: int = 7901

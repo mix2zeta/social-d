@@ -21,7 +21,7 @@ async def create_app():
     """Initialize the application server."""
     # log = logging.getLogger()
     # app = web.Application(middlewares=[exception.handle_exception], logger=log)
-    app = web.Application(logger=log)
+    app = web.Application()
     # Create a database connection pool
     app["pool"] = await asyncpg.create_pool(
         host=settings.DATABASE.PGHOST,
@@ -45,16 +45,9 @@ async def on_shutdown(app):
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(create_app())
-    logging.basicConfig(
-        stream=sys.stderr,
-        format="%(asctime)s %(name)s %(levelname)s %(message)s",
-        level=settings.APP.LOGLEVEL,
-        datefmt="[%Y-%m-%dT%H:%M:%S%z]",
-    )
+    logging.basicConfig(level=logging.DEBUG)
     web.run_app(
         app,
-        host=settings.APP.HOST,
-        port=settings.APP.PORT,
-        access_log_format='%a "%r" %s %b "%{Referer}i" "%{Fost-Request-ID}i" "%{X-Real-IP}i" "%{User-Agent}i" %Tfs.',
-        # [2019-11-06T05:50:00+0000] 172.18.0.1 "GET /account/B HTTP/1.1" 404 172 "-" "-" "-" "PostmanRuntime/7.19.0" 0.002807s.
+        host="0.0.0.0",
+        port=80,
     )

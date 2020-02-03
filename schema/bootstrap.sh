@@ -10,8 +10,8 @@ psql -v ON_ERROR_STOP=1 -U postgres -d $PGDBNAME <<-COMM
 COMM
 
 
-psql -v ON_ERROR_STOP=1 -U $PGUSER -d $PGDBNAME <<-MIGG
+psql -v ON_ERROR_STOP=1 -U $PGUSER -d $PGDBNAME <<-MIGRATE
 BEGIN;
 `cat /app/schema/001.sql`
 COMMIT;
-MIGG
+MIGRATE
