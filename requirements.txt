@@ -2,8 +2,12 @@ aiohttp
 asyncpg
 rq
 simplejson
+arrow
+jinja2
+pythainlp
 
 # dev package
 pytest
+pytest-aiohttp
 pytest-cov
 ipdb

@@ -3,7 +3,8 @@ import arrow
 
 
 def read_csv():
-    with open('/home/miz/pair/rawdata.csv', 'rU') as csv_file:
+    with open('raw_data/raw_10.csv', 'rU') as csv_file:
+        csv.field_size_limit(1131072)
         spamreader = csv.reader((line.replace('\0','') for line in csv_file), delimiter=",", dialect=csv.excel_tab)
         # spamreader = csv.reader(csv_file)
         new_line = []
@@ -43,11 +44,11 @@ def read_csv():
 
 
             if len(new_line) > 8:
-                print(new_line)
+                # print(new_line)
                 raise ValueError('this logix is not work')
   
 
-        print(aaa)
+        # print(aaa)
+# hashlib.md5(open('src/raw_data/raw_10a.csv', 'rb').read()).hexdigest()
 
-csv.field_size_limit(1131072)
-read_csv()
+# read_csv()
