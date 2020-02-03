@@ -11,7 +11,7 @@ CREATE TABLE data (
     type TEXT NOT NULL,
     message TEXT NOT NULL,
     time TIMESTAMP WITH TIME ZONE,
-    engagement INTEGER check(engagement > 0),
+    engagement INTEGER check(engagement >= 0),
     channel TEXT,
     owner_id TEXT,
     owner_name TEXT,

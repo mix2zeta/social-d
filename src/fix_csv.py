@@ -2,25 +2,46 @@ import csv
 import arrow 
 from database import get_connection
 import asyncio
+import hashlib
 
 
-def aasync_ja(file_hash):
-    return asyncio.run(tmp_ja(file_hash))
+def aasync_ja(file_path):
+    return asyncio.run(tmp_ja('raw_data/rawdata.csv'))
 
-async def tmp_ja(file_hash):
+async def tmp_ja(file_path):
+    file_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
     connection = await get_connection()
-    await connection.execute("INSERT INTO file VALUES ('2', '7472')")
-    return file_hash
+    async with connection.transaction():
+        # await connection.execute("INSERT INTO file VALUES ($1, $2)", file_path, file_hash)
 
-def read_csv():
-    with open('raw_data/raw_10.csv', 'rU') as csv_file:
-        csv.field_size_limit(1131072)
+        count = 0
+        for value in read_csv(file_path):
+            count += 1
+            print(count)
+            try:
+                value[3] = arrow.get(value[3]).datetime
+                value[4] = int(value[4])
+                await connection.execute("""
+                    INSERT INTO data (id, type, message, time, engagement, channel, owner_id, owner_name)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                    ON CONFLICT (id) 
+                    DO NOTHING
+                """,
+                    *value
+                )
+            except:
+                pass
+        return count 
+
+def read_csv(file_path):
+    with open(file_path, 'rU') as csv_file:
+        csv.field_size_limit(531072) # 0.5mb per field
         spamreader = csv.reader((line.replace('\0','') for line in csv_file), delimiter=",", dialect=csv.excel_tab)
-        # spamreader = csv.reader(csv_file)
+        next(spamreader, None) # skip header
         new_line = []
         aaa = 1
         for row in spamreader:
-            print(aaa)
+            # print(aaa)
             l_index = len(new_line)
 
             if len(row) == 0:
@@ -47,18 +68,43 @@ def read_csv():
                         new_line.pop(8)
                             
             if len(new_line) == 8:
+                try:
+                    arrow.get(new_line[3])
+                    # int(value[4])
+                except:
+                    for var in new_line[3:]:
+                        new_line[2] = new_line[2] + new_line[3]
+                        new_line.pop(3)
+                    continue
+
+                if new_line[1] not in ('tweet','reply','comment','reply-comment','post'):
+                    new_line = []
+                    continue
+                    # import ipdb; ipdb.set_trace()
+                    # for var in new_line[3:]:
+                    #     new_line[2] = new_line[2] + new_line[3]
+                    #     new_line.pop(3)
+                    # continue
+
+                # try:
+                #     int(value[4])
+                # except:
+                #     new_line = []
+                #     continue
+
+
                 aaa += 1
-                if aaa > 2756140:
-                    print(new_line)
+                yield new_line
                 new_line = []
 
 
             if len(new_line) > 8:
-                # print(new_line)
                 raise ValueError('this logix is not work')
-  
 
-        # print(aaa)
-# hashlib.md5(open('src/raw_data/raw_10a.csv', 'rb').read()).hexdigest()
 
-# read_csv()
+# count = 0
+# for value in read_csv('raw_data/rawdata.csv'):
+#     count += 1
+    # if count >= 33778:
+    #     print(value)
+    # print(count)
