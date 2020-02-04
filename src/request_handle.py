@@ -5,7 +5,7 @@ from aiohttp import web
 
 from conf import settings
 
-async def redeem_product(request):
+async def poke(request):
     # raise web.HTTPNotFound(text='Member number not found: please link with the1 account')
     from fix_csv import split_spawn_file_api
 
@@ -26,3 +26,19 @@ async def get_task(request):
             "task_status": task.get_status(),
             "task_result": task.result,
         })
+
+
+async def get_daily_message_count(request):
+    pass
+
+async def get_account_by_message(request):
+    pass
+
+async def get_message_by_engagement(request):
+    pass
+
+async def get_word_cloud(request):
+    pass
+
+async def get_hash_tag_cloud(request):
+    pass

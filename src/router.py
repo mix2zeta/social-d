@@ -3,14 +3,36 @@ import urllib.parse
 from conf import settings
 
 ROUTER = {
-    "link-request": {
-        "url": "/account",
-        "GET": "request_handle.redeem_product",
+    "poke": {
+        "url": "/poke",
+        "GET": "request_handle.poke",
+        "POST": "request_handle.poke",
     },
     "task": {
         "url": "/task/{task_id}",
         "GET": "request_handle.get_task",
     },
+    "message-daily": {
+        "url": "/date/{from}/{to}/message/daily",
+        "GET": "request_handle.get_daily_message_count"
+    },
+    "message-top": {
+        "url": "/date/{from}/{to}/message/top",
+        "GET": "request_handle.get_account_by_message"
+    },
+    "message-engagement": {
+        "url": "/date/{from}/{to}/message/engagement",
+        "GET": "request_handle.get_message_by_engagement"
+    },
+    "message-wordcloud":{
+        "url": "/date/{from}/{to}/wordcloud",
+        "GET": "request_handle.get_word_cloud"
+    },
+    "hashtag-wordcloud":{
+        "url": "/date/{from}/{to}/hashtag",
+        "GET": "request_handle.get_hash_tag_cloud"
+    },
+
 }
 
 
