@@ -9,7 +9,7 @@ rq-scheduler
 wordcloud
 
 # dev package
-ipdb
+pdbpp
 pytest
 pytest-aiohttp
 pytest-cov

@@ -6,6 +6,7 @@ ROUTER = {
     "poke_task": {
         "url": "/poke",
         "GET": "request_handle.poke_task",
+        "POST": "request_handle.poke_task",
     },
     "task": {
         "url": "/task/{task_id}",
