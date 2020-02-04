@@ -1,13 +1,15 @@
 aiohttp
-asyncpg
-rq
-simplejson
 arrow
+asyncpg
 jinja2
 pythainlp
+rq
+rq-scheduler
+simplejson
+wordcloud
 
 # dev package
+ipdb
 pytest
 pytest-aiohttp
 pytest-cov
-ipdb

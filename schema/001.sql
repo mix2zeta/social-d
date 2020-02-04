@@ -1,8 +1,10 @@
 CREATE TABLE file (
     name TEXT NOT NULL,
-    hash TEXT,
+    hash TEXT NOT NULL,
+    split TEXT NOT NULL,
+    task_id TEXT,
     posted TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    PRIMARY KEY (hash)
+    PRIMARY KEY (hash, split)
 );
 
 
@@ -17,3 +19,17 @@ CREATE TABLE data (
     owner_name TEXT,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE data_error(
+    data TEXT NOT NULL,
+    from_file TEXT NOT NULL,
+    posted TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE processed (
+    date DATE NOT NULL,
+    reverse_index JSON,
+    word_count JSON,
+    PRIMARY KEY (date)
+);
+

@@ -7,11 +7,11 @@ from conf import settings
 
 async def redeem_product(request):
     # raise web.HTTPNotFound(text='Member number not found: please link with the1 account')
-    from fix_csv import read_csv, aasync_ja
+    from fix_csv import split_spawn_file_api
 
     with rq.Connection(redis.from_url(settings.REDIS_URL)):
         q = rq.Queue()
-        task = q.enqueue(aasync_ja, '1234')
+        task = q.enqueue(split_spawn_file_api, 'raw_data/rawdata.csv')
 
         return web.json_response({'foo': task.get_id()})
 
@@ -26,21 +26,3 @@ async def get_task(request):
             "task_status": task.get_status(),
             "task_result": task.result,
         })
-
-
-
-
-
-# def read_csv():
-
-#     with open('raw_data/raw_10.csv', newline='\n') as csv_file:
-#         spamreader = csv.reader(csv_file)
-#         for row in spamreader:
-#             import ipdb; ipdb.set_trace()
-#             print(', '.join(row))
-#     print('Hi')
-
-# # import asyncio
-# # asyncio.run(read_csv())
-
-# read_csv()
