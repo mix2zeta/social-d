@@ -3,7 +3,7 @@ import arrow
 from database import get_connection
 import asyncio
 import hashlib
-from csv_splitter import split
+from worker.csv_splitter import split
 import os
 import redis
 import rq

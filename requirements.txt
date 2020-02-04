@@ -5,7 +5,7 @@ jinja2
 pythainlp
 rq
 rq-scheduler
-simplejson
+# simplejson
 wordcloud
 
 # dev package

@@ -1,26 +1,24 @@
-import os
-from conf import settings
 import asyncio
 import logging
+import json
+import os
+import sys
 
 import asyncpg
 from aiohttp import web
+
+from conf import settings
 from router import generate_routes
-# from middlewares import exception
-import simplejson
-import sys
 
 
 async def init_cnx(cnx):
-    await cnx.set_type_codec("jsonb", encoder=simplejson.dumps, decoder=simplejson.loads, schema="pg_catalog")
-    await cnx.set_type_codec("json", encoder=simplejson.dumps, decoder=simplejson.loads, schema="pg_catalog")
+    await cnx.set_type_codec("jsonb", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
+    await cnx.set_type_codec("json", encoder=json.dumps, decoder=json.loads, schema="pg_catalog")
     return cnx
 
 
 async def create_app():
     """Initialize the application server."""
-    # log = logging.getLogger()
-    # app = web.Application(middlewares=[exception.handle_exception], logger=log)
     app = web.Application()
     # Create a database connection pool
     app["pool"] = await asyncpg.create_pool(
@@ -46,8 +44,4 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(create_app())
     logging.basicConfig(level=logging.DEBUG)
-    web.run_app(
-        app,
-        host="0.0.0.0",
-        port=80,
-    )
+    web.run_app(app, host="0.0.0.0", port=80)
