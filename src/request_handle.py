@@ -61,7 +61,7 @@ async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
     for value in or_list:
         sub_query += f" OR message like '%{value}%'"
 
-    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'):
+    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'): # still not correct , distrint and get account
         query = f"""
             SELECT channel, owner_id, owner_name, message
             FROM data 
