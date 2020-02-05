@@ -12,6 +12,10 @@ ROUTER = {
         "url": "/task/{task_id}",
         "GET": "request_handle.get_task",
     },
+    "message": {
+        "url": "/message/{msg_id}",
+        "GET": "request_handle.get_message_by_id"
+    },
     "message-daily": {
         "url": "/date/{from}/{to}/message/daily",
         "GET": "request_handle.get_daily_message_count"
@@ -72,7 +76,7 @@ def generate_routes() -> list:
 
 def reverse(name: str, **kwargs) -> str:
     return urllib.parse.urljoin(
-        settings.APP.BASE_URL,
+        settings.BASE_URL,
         urllib.parse.quote_plus("." + ROUTER[name]["url"].format(**kwargs), safe="/"),
     )
 

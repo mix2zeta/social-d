@@ -7,7 +7,7 @@ import json
 import arrow
 from conf import settings
 from worker.csv_handle import split_spawn_file_api
-
+from router import reverse
 from database import DBConnection
 
 async def poke_task(request: web.BaseRequest) -> web.json_response:
@@ -28,6 +28,22 @@ async def get_task(request: web.BaseRequest) -> web.json_response:
             "task_status": task.get_status(),
             "task_result": task.result,
         })
+
+
+async def get_message_by_id(request: web.BaseRequest) -> web.json_response:
+    msg_id = request.match_info.get('msg_id')
+
+    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'):
+        result = await connection.fetchrow("""
+            SELECT * 
+            FROM data 
+            WHERE id = $1
+        """,
+            msg_id,
+        )
+        payload = dict(result)
+        payload['time'] = payload['time'].isoformat()
+        return web.json_response(payload)
 
 
 async def get_daily_message_count(request: web.BaseRequest) -> web.json_response:
@@ -71,7 +87,7 @@ async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
     for value in or_list:
         sub_query += f" OR lower(message) like '%{value.lower()}%'"
 
-    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'): # still not correct , distrint and get account
+    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'):
         query = f"""
             SELECT owner_id, owner_name, sum(engagement) as total_engagement, array_agg(id) as id_list
             FROM data 
@@ -88,7 +104,13 @@ async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
         )
         payload = []
         for item in result:
-            payload.append(dict(item))
+            item = dict(item)
+            url_id_list = []
+            for msg in item['id_list']:
+                msg = reverse('message', msg_id=msg)
+                url_id_list.append(msg)
+            item['id_list'] = url_id_list
+            payload.append(item)
         return web.json_response(payload)
 
 

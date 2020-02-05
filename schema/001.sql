@@ -30,6 +30,7 @@ CREATE TABLE processed (
     date DATE NOT NULL,
     reverse_index JSON,
     word_count JSON,
+    hashtag_count JSON,
     PRIMARY KEY (date)
 );
 
