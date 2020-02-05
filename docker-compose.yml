@@ -63,9 +63,6 @@ services:
   social-d-redis:
     image: redis:5
     container_name: social-d-redis
-    # volumes:
-    #   - ./src:/usr/src
-    #   - ./raw_data:/usr/src/raw_data
     environment:
       PYTHONPATH: /usr/src
       BASE_URL: "http://localhost:7901"
@@ -98,4 +95,11 @@ services:
       retries: 3
     restart: on-failure
 
+  social-d-jupyter:
+    image: jupyter/scipy-notebook
+    container_name: social-d-jupyter
+    volumes:
+      - ./jupyter:/home/jovyan
+    ports:
+      - "8888:8888"
 

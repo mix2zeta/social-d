@@ -1,12 +1,10 @@
 aiohttp
 arrow
 asyncpg
-# jinja2
 pandas
 pythainlp
 rq
 rq-scheduler
-# simplejson
 wordcloud
 
 # dev package

@@ -20,10 +20,10 @@ def check_is_any_new_file():
                 task = q.enqueue(split_spawn_file_api, f'{settings.RAW_DATA_PATH}/{csv_file}')
 
 
-def split_spawn_file_api(file_path):
+def split_spawn_file_api(file_path:str) -> list:
     return asyncio.run(split_spawn_file(file_path))
 
-async def split_spawn_file(file_path):
+async def split_spawn_file(file_path:str) -> list:
     output = []
     connection = await get_connection()
     async with connection.transaction(isolation='serializable'):
@@ -52,10 +52,10 @@ async def split_spawn_file(file_path):
     return output
 
 
-def insert_data_from_csv_api(file_path, file_hash):
+def insert_data_from_csv_api(file_path:str, file_hash:str) -> int:
     return asyncio.run(insert_data_from_csv(file_path, file_hash))
 
-async def insert_data_from_csv(file_path, file_hash):
+async def insert_data_from_csv(file_path:str, file_hash:str) -> int:
     count = 0
     connection = await get_connection()
     async with connection.transaction(isolation='serializable'):
@@ -86,17 +86,16 @@ async def insert_data_from_csv(file_path, file_hash):
     return count 
 
 
-def get_line_from_csv(file_path):
+def get_line_from_csv(file_path:str) -> str:
     with open(file_path, 'rU') as csv_file:
         csv.field_size_limit(531072) # 0.5mb per field
         spamreader = csv.reader((line.replace('\0','') for line in csv_file), delimiter=",", dialect=csv.excel_tab) # we need rU but remove null byte
         next(spamreader, None) # skip header
         new_line = []
-        aaa = 1
         for row in spamreader:
             l_index = len(new_line)
 
-            if len(row) == 0:
+            if len(row) == 0: # skip empty row
                 continue
 
             if l_index == 0:
@@ -105,7 +104,7 @@ def get_line_from_csv(file_path):
                 new_line[l_index-1] = new_line[l_index-1] + row[0]
                 new_line = new_line + row[1:]
 
-            if len(new_line) > 8:
+            if len(new_line) > 8: # if size > 8 combine message until find date
                 for var in new_line[3:]:
                     try:
                         arrow.get(var)
@@ -114,12 +113,12 @@ def get_line_from_csv(file_path):
                         new_line[2] = new_line[2] + new_line[3]
                         new_line.pop(3)
 
-            if len(new_line) > 8:
+            if len(new_line) > 8: # combine name
                 for var in new_line[8:]:
                         new_line[7] = new_line[7] + new_line[8]
                         new_line.pop(8)
                             
-            if len(new_line) == 8:
+            if len(new_line) == 8: # check date again
                 try:
                     arrow.get(new_line[3])
                 except:
@@ -128,7 +127,6 @@ def get_line_from_csv(file_path):
                         new_line.pop(3)
                     continue
 
-                aaa += 1
                 yield new_line
                 new_line = []
 

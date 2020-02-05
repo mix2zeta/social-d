@@ -8,6 +8,7 @@ from rq_scheduler import Scheduler
 from conf import settings
 from worker.csv_handle import check_is_any_new_file
 
+
 def loop_check_is_any_new_file():
     with rq.Connection(redis.from_url(settings.REDIS_URL)):
         q = rq.Queue()

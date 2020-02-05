@@ -134,3 +134,4 @@ dmypy.json
 /src/tests/test_media/*
 /src/worker/test/test_split_data/*
 rawdata.csv
+jupyter/.*
