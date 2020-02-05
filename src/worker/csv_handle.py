@@ -1,13 +1,15 @@
-import csv
-import arrow 
-from database import get_connection
 import asyncio
-import hashlib
-from worker.csv_splitter import split
+import csv
 import os
+from worker.csv_splitter import split
+
+import arrow 
+import hashlib
 import redis
 import rq
+
 from conf import settings
+from database import get_connection
 
 
 

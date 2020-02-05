@@ -51,23 +51,35 @@ async def get_daily_message_count(request: web.BaseRequest) -> web.json_response
 async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
     from_date = request.match_info.get('from')
     to_date = request.match_info.get('to')
+    key_word = request.query.get('q').split(' ')
 
-    and_list = ['samsung', 's10']
-    or_list = ['@Chuuchu69 เปนกำลังใจให้รายเดือนเหมือนกันค่ะ']
+    and_list = []
+    or_list = []
+
+    and_list.append(key_word.pop(0))
+    index = 0
+    for _ in range(0, int(len(key_word)/2)):
+        if key_word[index].lower() == 'and':
+            and_list.append(key_word[index+1])
+        if key_word[index].lower() == 'or':
+            or_list.append(key_word[index+1])
+        index += 2
 
     sub_query = ''
     for value in and_list:
-        sub_query += f" AND message like '%{value}%'"
+        sub_query += f" AND lower(message) like '%{value.lower()}%'"
     for value in or_list:
-        sub_query += f" OR message like '%{value}%'"
+        sub_query += f" OR lower(message) like '%{value.lower()}%'"
 
     async with DBConnection(request) as connection, connection.transaction(isolation='serializable'): # still not correct , distrint and get account
         query = f"""
-            SELECT channel, owner_id, owner_name, message
+            SELECT owner_id, owner_name, sum(engagement) as total_engagement, array_agg(id) as id_list
             FROM data 
             WHERE time BETWEEN $1 AND $2 
             {sub_query}
-            ORDER BY 2,3,4
+            GROUP BY owner_id,owner_name
+            ORDER BY total_engagement DESC
+            limit 10
         """
         print(query)
         result = await connection.fetch(query,
@@ -78,7 +90,6 @@ async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
         for item in result:
             payload.append(dict(item))
         return web.json_response(payload)
-
 
 
 async def get_message_by_engagement(request: web.BaseRequest) -> web.json_response:
