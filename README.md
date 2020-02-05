@@ -122,14 +122,14 @@ RESPONSE
 }
 ```
 ### Wordcloud
-GET : `http://localhost:1111/date/{from}/{to}/message/wordcloud`
-http://localhost:1111/date/2019-01-01/2019-01-02/message/wordcloud
+- GET : `http://localhost:1111/date/{from}/{to}/message/wordcloud`
+- http://localhost:1111/date/2019-01-01/2019-01-02/message/wordcloud
 
 ![](sample/wordcloud__2019-01-02__2019-01-03.png)
 
 ### hashtag cloud
-GET : `http://localhost:1111/date/{from}/{to}/message/hashtag`
-http://localhost:1111/date/2019-01-01/2019-01-02/message/hashtag
+- GET : `http://localhost:1111/date/{from}/{to}/message/hashtag`
+- http://localhost:1111/date/2019-01-01/2019-01-02/message/hashtag
 
 ![](sample/hashtag__2019-01-02__2019-01-03.png)
 
@@ -162,65 +162,73 @@ This project have 5 container following this list
 - `social-d-jupyter` as a Dashboard
 
 ### Request FLOW
-```mermaid
-sequenceDiagram
-participant D As Dashboard
-participant S As Service
-  participant DB As Database
-  
-  participant Dir As Directory
-  
-  
-  D->>S: Request Data
-  S->>DB: fetch data
-  DB-->>S: OK, DATA
-  S-->>D: 200, DATA
+<details>
+    <summary> mermaid </summary>
 
-  D->>S: Request Wordcloud
-  S->>Dir: Is image Exist ?
-  alt Yes
-  Dir-->>S: Image
-  else No
-  S->>DB: fetch data
-  DB-->>S: OK, DATA
-  S->>S: Generate image
-  S->>Dir:Save image
-  Dir-->>S: Image
-  end
-  S-->>D: 200, Image
-  
-```
+    ```mermaid
+    sequenceDiagram
+        participant D As Dashboard
+        participant S As Service
+        participant DB As Database
+        participant Dir As Directory
+
+
+        D->>S: Request Data
+        S->>DB: fetch data
+        DB-->>S: OK, DATA
+        S-->>D: 200, DATA
+
+        D->>S: Request Wordcloud
+        S->>Dir: Is image Exist ?
+        alt Yes
+        Dir-->>S: Image
+        else No
+        S->>DB: fetch data
+        DB-->>S: OK, DATA
+        S->>S: Generate image
+        S->>Dir:Save image
+        Dir-->>S: Image
+        end
+        S-->>D: 200, Image
+    ```
+</details>
+
+[![](https://mermaid.ink/img/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBEIEFzIERhc2hib2FyZFxucGFydGljaXBhbnQgUyBBcyBTZXJ2aWNlXG4gIHBhcnRpY2lwYW50IERCIEFzIERhdGFiYXNlXG4gIFxuICBwYXJ0aWNpcGFudCBEaXIgQXMgRGlyZWN0b3J5XG4gIFxuICBcbiAgRC0-PlM6IFJlcXVlc3QgRGF0YVxuICBTLT4-REI6IGZldGNoIGRhdGFcbiAgREItLT4-UzogT0ssIERBVEFcbiAgUy0tPj5EOiAyMDAsIERBVEFcblxuICBELT4-UzogUmVxdWVzdCBXb3JkY2xvdWRcbiAgUy0-PkRpcjogSXMgaW1hZ2UgRXhpc3QgP1xuICBhbHQgWWVzXG4gIERpci0tPj5TOiBJbWFnZVxuICBlbHNlIE5vXG4gIFMtPj5EQjogZmV0Y2ggZGF0YVxuICBEQi0tPj5TOiBPSywgREFUQVxuICBTLT4-UzogR2VuZXJhdGUgaW1hZ2VcbiAgUy0-PkRpcjpTYXZlIGltYWdlXG4gIERpci0tPj5TOiBJbWFnZVxuICBlbmRcbiAgUy0tPj5EOiAyMDAsIEltYWdlXG4gICIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoic2VxdWVuY2VEaWFncmFtXG5wYXJ0aWNpcGFudCBEIEFzIERhc2hib2FyZFxucGFydGljaXBhbnQgUyBBcyBTZXJ2aWNlXG4gIHBhcnRpY2lwYW50IERCIEFzIERhdGFiYXNlXG4gIFxuICBwYXJ0aWNpcGFudCBEaXIgQXMgRGlyZWN0b3J5XG4gIFxuICBcbiAgRC0-PlM6IFJlcXVlc3QgRGF0YVxuICBTLT4-REI6IGZldGNoIGRhdGFcbiAgREItLT4-UzogT0ssIERBVEFcbiAgUy0tPj5EOiAyMDAsIERBVEFcblxuICBELT4-UzogUmVxdWVzdCBXb3JkY2xvdWRcbiAgUy0-PkRpcjogSXMgaW1hZ2UgRXhpc3QgP1xuICBhbHQgWWVzXG4gIERpci0tPj5TOiBJbWFnZVxuICBlbHNlIE5vXG4gIFMtPj5EQjogZmV0Y2ggZGF0YVxuICBEQi0tPj5TOiBPSywgREFUQVxuICBTLT4-UzogR2VuZXJhdGUgaW1hZ2VcbiAgUy0-PkRpcjpTYXZlIGltYWdlXG4gIERpci0tPj5TOiBJbWFnZVxuICBlbmRcbiAgUy0tPj5EOiAyMDAsIEltYWdlXG4gICIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)
 
 ### CSV FLOW
-```mermaid
-sequenceDiagram
-  participant DB As Database
-  participant W As Worker
-  participant D As Directory
-  participant R As Redis
-  participant Sc As Scheduler
-  
-  loop Every 10 minute
-  Sc-->>R: Add check new CSV
-  end
 
-  opt Split CSV
-  D->>W: Found new CSV
-  W->>D: Split CSV into small file
-  W->>R: Add process csv job
-  R-->>W: OK
-  W->>DB: Record split file
-  DB-->>W: OK
-  end
+<details>
+    <summary> mermaid </summary>
+    ```mermaid
+    sequenceDiagram
+        participant DB As Database
+        participant W As Worker
+        participant D As Directory
+        participant R As Redis
+        participant Sc As Scheduler
+        
+        loop Every 10 minute
+        Sc-->>R: Add check new CSV
+        end
 
-  opt Process CSV
-  W->D: OPEN CSV
-  W->>DB: Record
-  DB-->>W:OK
-  end
+        opt Split CSV
+        D->>W: Found new CSV
+        W->>D: Split CSV into small file
+        W->>R: Add process csv job
+        R-->>W: OK
+        W->>DB: Record split file
+        DB-->>W: OK
+        end
 
+        opt Process CSV
+        W->D: OPEN CSV
+        W->>DB: Record
+        DB-->>W:OK
+        end
+    ```
+</details>
 
-```
+[![](https://mermaid.ink/img/eyJjb2RlIjoiICAgIHNlcXVlbmNlRGlhZ3JhbVxuICAgICAgICBwYXJ0aWNpcGFudCBEQiBBcyBEYXRhYmFzZVxuICAgICAgICBwYXJ0aWNpcGFudCBXIEFzIFdvcmtlclxuICAgICAgICBwYXJ0aWNpcGFudCBEIEFzIERpcmVjdG9yeVxuICAgICAgICBwYXJ0aWNpcGFudCBSIEFzIFJlZGlzXG4gICAgICAgIHBhcnRpY2lwYW50IFNjIEFzIFNjaGVkdWxlclxuICAgICAgICBcbiAgICAgICAgbG9vcCBFdmVyeSAxMCBtaW51dGVcbiAgICAgICAgU2MtLT4-UjogQWRkIGNoZWNrIG5ldyBDU1ZcbiAgICAgICAgZW5kXG5cbiAgICAgICAgb3B0IFNwbGl0IENTVlxuICAgICAgICBELT4-VzogRm91bmQgbmV3IENTVlxuICAgICAgICBXLT4-RDogU3BsaXQgQ1NWIGludG8gc21hbGwgZmlsZVxuICAgICAgICBXLT4-UjogQWRkIHByb2Nlc3MgY3N2IGpvYlxuICAgICAgICBSLS0-Plc6IE9LXG4gICAgICAgIFctPj5EQjogUmVjb3JkIHNwbGl0IGZpbGVcbiAgICAgICAgREItLT4-VzogT0tcbiAgICAgICAgZW5kXG5cbiAgICAgICAgb3B0IFByb2Nlc3MgQ1NWXG4gICAgICAgIFctPkQ6IE9QRU4gQ1NWXG4gICAgICAgIFctPj5EQjogUmVjb3JkXG4gICAgICAgIERCLS0-Plc6T0tcbiAgICAgICAgZW5kIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiICAgIHNlcXVlbmNlRGlhZ3JhbVxuICAgICAgICBwYXJ0aWNpcGFudCBEQiBBcyBEYXRhYmFzZVxuICAgICAgICBwYXJ0aWNpcGFudCBXIEFzIFdvcmtlclxuICAgICAgICBwYXJ0aWNpcGFudCBEIEFzIERpcmVjdG9yeVxuICAgICAgICBwYXJ0aWNpcGFudCBSIEFzIFJlZGlzXG4gICAgICAgIHBhcnRpY2lwYW50IFNjIEFzIFNjaGVkdWxlclxuICAgICAgICBcbiAgICAgICAgbG9vcCBFdmVyeSAxMCBtaW51dGVcbiAgICAgICAgU2MtLT4-UjogQWRkIGNoZWNrIG5ldyBDU1ZcbiAgICAgICAgZW5kXG5cbiAgICAgICAgb3B0IFNwbGl0IENTVlxuICAgICAgICBELT4-VzogRm91bmQgbmV3IENTVlxuICAgICAgICBXLT4-RDogU3BsaXQgQ1NWIGludG8gc21hbGwgZmlsZVxuICAgICAgICBXLT4-UjogQWRkIHByb2Nlc3MgY3N2IGpvYlxuICAgICAgICBSLS0-Plc6IE9LXG4gICAgICAgIFctPj5EQjogUmVjb3JkIHNwbGl0IGZpbGVcbiAgICAgICAgREItLT4-VzogT0tcbiAgICAgICAgZW5kXG5cbiAgICAgICAgb3B0IFByb2Nlc3MgQ1NWXG4gICAgICAgIFctPkQ6IE9QRU4gQ1NWXG4gICAgICAgIFctPj5EQjogUmVjb3JkXG4gICAgICAgIERCLS0-Plc6T0tcbiAgICAgICAgZW5kIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0)
 
 ## Improvement
 
