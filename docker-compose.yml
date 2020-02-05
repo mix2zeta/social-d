@@ -29,8 +29,25 @@ services:
     command: "rq worker -u redis://social-d-redis:6379"
     volumes:
       - ./src:/usr/src
-    ports:
-      - "1112:80"
+    depends_on:
+      - social-d-db
+    environment:
+      PYTHONPATH: /usr/src
+      REDIS_URL: redis://social-d-redis:6379
+      BASE_URL: "http://localhost:1111"
+      PGHOST: social-d-db
+      PGPORT: 5432
+      PGDBNAME: social_service
+      PGUSER: social
+      PGPASSWORD: password
+
+  social-d-scheduler:
+    image: social-d-service:${TAG:-latest}
+    build: .
+    container_name: social-d-scheduler
+    command: "rqscheduler -u redis://social-d-redis:6379"
+    volumes:
+      - ./src:/usr/src
     depends_on:
       - social-d-db
     environment:

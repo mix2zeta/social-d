@@ -13,14 +13,14 @@ from wordcloud import WordCloud
 from conf import settings
 from database import DBConnection
 from router import reverse
-from worker.csv_handle import split_spawn_file_api
+from worker.csv_handle import check_is_any_new_file
 from worker.word_count import get_count_by_list
 
 
 async def poke_task(request: web.BaseRequest) -> web.json_response:
     with rq.Connection(redis.from_url(settings.REDIS_URL)):
         q = rq.Queue()
-        task = q.enqueue(split_spawn_file_api, 'raw_data/rawdata.csv')
+        task = q.enqueue(check_is_any_new_file)
 
         return web.json_response({'task': task.get_id()})
 
@@ -48,6 +48,8 @@ async def get_message_by_id(request: web.BaseRequest) -> web.json_response:
         """,
             msg_id,
         )
+        if not result:
+            raise web.HTTPNotFound(text='message not found')
         payload = dict(result)
         payload['time'] = payload['time'].isoformat()
         return web.json_response(payload)
@@ -68,6 +70,8 @@ async def get_daily_message_count(request: web.BaseRequest) -> web.json_response
             arrow.get(from_date).datetime,
             arrow.get(to_date).datetime
         )
+        if not result:
+            raise web.HTTPNotFound(text='daily message not found')
         return web.json_response(dict(result))
 
 
@@ -109,6 +113,8 @@ async def get_account_by_message(request: web.BaseRequest) -> web.json_response:
             arrow.get(from_date).datetime,
             arrow.get(to_date).datetime,
         )
+        if not result:
+            raise web.HTTPNotFound(text='daily message not found')
         payload = []
         for item in result:
             item = dict(item)
@@ -136,6 +142,8 @@ async def get_message_by_engagement(request: web.BaseRequest) -> web.json_respon
             arrow.get(from_date).datetime,
             arrow.get(to_date).datetime
         )
+        if not result:
+            raise web.HTTPNotFound(text='daily message not found')
         payload = []
         for item in result:
             payload.append(dict(item))
@@ -149,8 +157,8 @@ async def get_word_cloud(request: web.FileResponse) -> web.json_response:
     if cloud_type not in ('wordcloud', 'hashtag', 'mention'):
         cloud_type = 'wordcloud'
 
-    if os.path.exists(f"media/{cloud_type}__{from_date}__{to_date}.png"):
-        return web.FileResponse(f"media/{cloud_type}__{from_date}__{to_date}.png")
+    if os.path.exists(f"{settings.MEDIA_PATH}/{cloud_type}__{from_date}__{to_date}.png"):
+        return web.FileResponse(f"{settings.MEDIA_PATH}/{cloud_type}__{from_date}__{to_date}.png")
 
     async with DBConnection(request) as connection, connection.transaction(isolation='serializable'):
         result = await connection.fetch("""
@@ -161,6 +169,8 @@ async def get_word_cloud(request: web.FileResponse) -> web.json_response:
             arrow.get(from_date).datetime,
             arrow.get(to_date).datetime
         )
+        if not result:
+            raise web.HTTPNotFound(text='daily message not found')
         dictionary = await get_count_by_list(result, cloud_type)
 
         wc = WordCloud(
@@ -173,5 +183,5 @@ async def get_word_cloud(request: web.FileResponse) -> web.json_response:
         wc.generate_from_frequencies(dictionary)
         plt.imshow(wc, interpolation='bilinear')
         plt.axis("off")
-        plt.savefig(f"media/{cloud_type}__{from_date}__{to_date}.png", format="png")
-        return web.FileResponse(f"media/{cloud_type}__{from_date}__{to_date}.png")
+        plt.savefig(f"{settings.MEDIA_PATH}/{cloud_type}__{from_date}__{to_date}.png", format="png")
+        return web.FileResponse(f"{settings.MEDIA_PATH}/{cloud_type}__{from_date}__{to_date}.png")

@@ -15,3 +15,6 @@ class settings:
     REDIS_URL: str = os.environ["REDIS_URL"]
     BASE_URL: str = os.environ["BASE_URL"]
     CSV_LINE_LIMIT = 50000
+    RAW_DATA_PATH = '/usr/src/raw_data'
+    SPLIT_DATA_PATH = '/usr/src/spilt_data'
+    MEDIA_PATH = '/usr/src/media'

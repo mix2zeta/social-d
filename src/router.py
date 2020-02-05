@@ -29,7 +29,7 @@ ROUTER = {
         "GET": "request_handle.get_message_by_engagement"
     },
     "wordcloud":{
-        "url": "/date/{from}/{to}/{cloud_type}",
+        "url": "/date/{from}/{to}/message/{cloud_type}",
         "GET": "request_handle.get_word_cloud"
     },
 

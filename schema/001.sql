@@ -4,6 +4,7 @@ CREATE TABLE file (
     split TEXT NOT NULL,
     task_id TEXT,
     posted TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    executed TIMESTAMP WITH TIME ZONE,
     PRIMARY KEY (hash, split)
 );
 

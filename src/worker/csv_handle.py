@@ -12,6 +12,14 @@ from conf import settings
 from database import get_connection
 
 
+def check_is_any_new_file():
+    for csv_file in os.listdir(settings.RAW_DATA_PATH):
+        if csv_file[-4:] == '.csv':
+            with rq.Connection(redis.from_url(settings.REDIS_URL)):
+                q = rq.Queue()
+                task = q.enqueue(split_spawn_file_api, f'{settings.RAW_DATA_PATH}/{csv_file}')
+
+
 def split_spawn_file_api(file_path):
     return asyncio.run(split_spawn_file(file_path))
 
@@ -23,15 +31,16 @@ async def split_spawn_file(file_path):
 
         check_hash = await connection.fetch("SELECT * FROM file WHERE hash=$1", file_hash)
         if check_hash != []:
+            print('already process')
             return None # already process
 
         template = f'{os.path.basename(file_path).replace(".csv", "")}__%s.csv'
-        output = split(open(file_path, 'rU'), row_limit=settings.CSV_LINE_LIMIT, output_path='split_data', output_name_template=template)
+        output = split(open(file_path, 'rU'), row_limit=settings.CSV_LINE_LIMIT, output_path=settings.SPLIT_DATA_PATH, output_name_template=template)
 
         for item in output:
             with rq.Connection(redis.from_url(settings.REDIS_URL)):
                 q = rq.Queue()
-                task = q.enqueue(insert_data_from_csv_api, item)
+                task = q.enqueue(insert_data_from_csv_api, item, file_hash)
 
                 await connection.execute("""
                     INSERT INTO file ("name", "hash", "split", "task_id") 
@@ -43,16 +52,13 @@ async def split_spawn_file(file_path):
     return output
 
 
-def insert_data_from_csv_api(file_path):
-    return asyncio.run(insert_data_from_csv(file_path))
+def insert_data_from_csv_api(file_path, file_hash):
+    return asyncio.run(insert_data_from_csv(file_path, file_hash))
 
-async def insert_data_from_csv(file_path):
-    file_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
+async def insert_data_from_csv(file_path, file_hash):
+    count = 0
     connection = await get_connection()
     async with connection.transaction(isolation='serializable'):
-        # await connection.execute("INSERT INTO file VALUES ($1, $2)", file_path, file_hash)
-
-        count = 0
         for value in get_line_from_csv(file_path):
             count += 1
             try:
@@ -74,10 +80,11 @@ async def insert_data_from_csv(file_path):
                     str(value),
                     file_path
                 )
+        await connection.execute("UPDATE file SET executed=now() WHERE hash=$1 AND split=$2", file_hash, file_path)
 
     await connection.close()
     return count 
-    
+
 
 def get_line_from_csv(file_path):
     with open(file_path, 'rU') as csv_file:
