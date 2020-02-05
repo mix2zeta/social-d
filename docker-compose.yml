@@ -2,7 +2,7 @@ version: '3'
 services:
 
   social-d-service:
-    image: social-d-service:${TAG:-latest}
+    image: docker.pkg.github.com/mix2zeta/social-d/social-d-service:${TAG:-latest}
     build: .
     container_name: social-d-service
     command: "python -u /usr/src/server.py"
@@ -23,7 +23,7 @@ services:
       PGPASSWORD: password
 
   social-d-worker:
-    image: social-d-service:${TAG:-latest}
+    image: docker.pkg.github.com/mix2zeta/social-d/social-d-service:${TAG:-latest}
     build: .
     container_name: social-d-worker
     command: "rq worker -u redis://social-d-redis:6379"
@@ -42,7 +42,7 @@ services:
       PGPASSWORD: password
 
   social-d-scheduler:
-    image: social-d-service:${TAG:-latest}
+    image: docker.pkg.github.com/mix2zeta/social-d/social-d-service:${TAG:-latest}
     build: .
     container_name: social-d-scheduler
     command: "rqscheduler -u redis://social-d-redis:6379"
