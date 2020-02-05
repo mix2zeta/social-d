@@ -3,7 +3,7 @@ import asyncpg
 import json
 
 
-async def get_connection():
+async def get_connection(): # for worker
     cnx = await asyncpg.connect(
         host=settings.DATABASE.PGHOST,
         database=settings.DATABASE.PGDBNAME,
@@ -16,7 +16,7 @@ async def get_connection():
     return cnx
     
 
-class DBConnection():
+class DBConnection(): # for request
     def __init__(self, request):
         self.request = request
         self.pool = request.app['pool']

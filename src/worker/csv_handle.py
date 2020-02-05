@@ -12,12 +12,11 @@ from conf import settings
 from database import get_connection
 
 
-
 def split_spawn_file_api(file_path):
     return asyncio.run(split_spawn_file(file_path))
 
 async def split_spawn_file(file_path):
-
+    output = []
     connection = await get_connection()
     async with connection.transaction(isolation='serializable'):
         file_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
@@ -27,7 +26,7 @@ async def split_spawn_file(file_path):
             return None # already process
 
         template = f'{os.path.basename(file_path).replace(".csv", "")}__%s.csv'
-        output = split(open(file_path, 'rU'), row_limit=50000, output_path='split_data', output_name_template=template)
+        output = split(open(file_path, 'rU'), row_limit=settings.CSV_LINE_LIMIT, output_path='split_data', output_name_template=template)
 
         for item in output:
             with rq.Connection(redis.from_url(settings.REDIS_URL)):
@@ -39,15 +38,13 @@ async def split_spawn_file(file_path):
                     VALUES ($1, $2, $3, $4)
                 """, file_path, file_hash, item, task.get_id())
         
-        print(output)
-        return output
-    # await connection.close()
+    await connection.close()
+    print(output)
+    return output
+
 
 def insert_data_from_csv_api(file_path):
     return asyncio.run(insert_data_from_csv(file_path))
-
-# split_spawn_file_api('raw_data/100k.csv')
-
 
 async def insert_data_from_csv(file_path):
     file_hash = hashlib.md5(open(file_path, 'rb').read()).hexdigest()
@@ -58,7 +55,6 @@ async def insert_data_from_csv(file_path):
         count = 0
         for value in get_line_from_csv(file_path):
             count += 1
-            # print(count)
             try:
                 value[3] = arrow.get(value[3]).datetime
                 value[4] = int(value[4])
@@ -70,7 +66,7 @@ async def insert_data_from_csv(file_path):
                 """,
                     *value
                 )
-            except: # at this point I accept that I can't prase all data just record error
+            except: # at this point I accept that I can't prase all data... just record error
                 await connection.execute("""
                     INSERT INTO data_error (data, from_file)
                     VALUES ($1, $2)
@@ -81,6 +77,7 @@ async def insert_data_from_csv(file_path):
 
     await connection.close()
     return count 
+    
 
 def get_line_from_csv(file_path):
     with open(file_path, 'rU') as csv_file:
@@ -124,10 +121,6 @@ def get_line_from_csv(file_path):
                         new_line.pop(3)
                     continue
 
-                # if new_line[1] not in ('tweet','reply','comment','reply-comment','post'):
-                #     new_line = []
-                #     continue
-
                 aaa += 1
                 yield new_line
                 new_line = []
@@ -135,12 +128,4 @@ def get_line_from_csv(file_path):
             if len(new_line) > 8:
                 raise ValueError('This logic is not work')
 
-        yield new_line
-
-
-# count = 0
-# for value in get_line_from_csv('raw_data/rawdata.csv'):
-#     count += 1
-    # if count >= 33778:
-    #     print(value)
-    # print(count)
+        yield new_line # return last line for error

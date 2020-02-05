@@ -1,7 +1,8 @@
 aiohttp
 arrow
 asyncpg
-jinja2
+# jinja2
+pandas
 pythainlp
 rq
 rq-scheduler

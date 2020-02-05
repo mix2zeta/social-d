@@ -28,13 +28,9 @@ ROUTER = {
         "url": "/date/{from}/{to}/message/engagement",
         "GET": "request_handle.get_message_by_engagement"
     },
-    "message-wordcloud":{
-        "url": "/date/{from}/{to}/wordcloud",
+    "wordcloud":{
+        "url": "/date/{from}/{to}/{cloud_type}",
         "GET": "request_handle.get_word_cloud"
-    },
-    "hashtag-wordcloud":{
-        "url": "/date/{from}/{to}/hashtag",
-        "GET": "request_handle.get_hash_tag_cloud"
     },
 
 }

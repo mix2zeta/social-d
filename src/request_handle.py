@@ -1,14 +1,21 @@
+import os
 import csv
-import redis
-import rq
-from aiohttp import web
 import json
 
 import arrow
+import redis
+import rq
+import matplotlib.pyplot as plt
+from aiohttp import web
+from PIL import Image
+from wordcloud import WordCloud
+
 from conf import settings
-from worker.csv_handle import split_spawn_file_api
-from router import reverse
 from database import DBConnection
+from router import reverse
+from worker.csv_handle import split_spawn_file_api
+from worker.word_count import get_count_by_list
+
 
 async def poke_task(request: web.BaseRequest) -> web.json_response:
     with rq.Connection(redis.from_url(settings.REDIS_URL)):
@@ -135,26 +142,36 @@ async def get_message_by_engagement(request: web.BaseRequest) -> web.json_respon
         return web.json_response(payload)
 
 
-from PIL import Image
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
-
 async def get_word_cloud(request: web.FileResponse) -> web.json_response:
-    dictionary = {
-        'asdasdA': 1,
-        'fefegb': 5,
-        'Cdsgsdg': 7,
-        'Dweeeeeeeeeeee': 80
-    }
+    from_date = request.match_info.get('from')
+    to_date = request.match_info.get('to')
+    cloud_type = request.match_info.get('cloud_type')
+    if cloud_type not in ('wordcloud', 'hashtag', 'mention'):
+        cloud_type = 'wordcloud'
 
-    # wc = WordCloud(background_color="white",width=1000,height=1000, max_words=100,relative_scaling=0.5,normalize_plurals=False)
-    wc = WordCloud(background_color="white",width=1000,height=1000, max_words=100)
-    wc.generate_from_frequencies(dictionary)
-    plt.imshow(wc)
-    # plt.imshow(wc, interpolation='bilinear')
-    plt.axis("off")
-    plt.savefig("media/spa_wine.jpg", format="jpg")
-    return web.FileResponse('media/spa_wine.jpg')
+    if os.path.exists(f"media/{cloud_type}__{from_date}__{to_date}.png"):
+        return web.FileResponse(f"media/{cloud_type}__{from_date}__{to_date}.png")
 
-async def get_hash_tag_cloud(request: web.BaseRequest) -> web.json_response:
-    pass
+    async with DBConnection(request) as connection, connection.transaction(isolation='serializable'):
+        result = await connection.fetch("""
+            SELECT message
+            FROM data 
+            WHERE time BETWEEN $1 AND $2
+        """,
+            arrow.get(from_date).datetime,
+            arrow.get(to_date).datetime
+        )
+        dictionary = await get_count_by_list(result, cloud_type)
+
+        wc = WordCloud(
+            background_color="white",
+            width=1000,
+            height=1000,
+            font_path='THSarabunNew.ttf',
+            relative_scaling = 0.5,
+        )
+        wc.generate_from_frequencies(dictionary)
+        plt.imshow(wc, interpolation='bilinear')
+        plt.axis("off")
+        plt.savefig(f"media/{cloud_type}__{from_date}__{to_date}.png", format="png")
+        return web.FileResponse(f"media/{cloud_type}__{from_date}__{to_date}.png")
