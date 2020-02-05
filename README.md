@@ -11,6 +11,11 @@ id,type,message,time,engagement,channel,owner id,owner name
 
 - [Setup & How to use](##Setup)
 - [Running test](##test)
+- [API](##API-and-Dashboard)
+- [Example Dashboard](jupyter/dashboard.ipynb)
+- [Dashboard](###Dashboard)
+- [System design](##System-design)
+- [Improvement](##Improvement)
 
 ## Setup
 
@@ -43,7 +48,9 @@ make tests
 
 You can see all example request and response in [Example Dashboard](jupyter/dashboard.ipynb)
 
-### poke
+All the link can access if you already run service and have data
+
+### Poke
 If you place new csv in raw_data folder and want to process right away you can send request to this
 - GET : `http://localhost:1111/poke`
 ```json
@@ -117,13 +124,14 @@ RESPONSE
 ### Wordcloud
 GET : `http://localhost:1111/date/{from}/{to}/message/wordcloud`
 http://localhost:1111/date/2019-01-01/2019-01-02/message/wordcloud
+
 ![](sample/wordcloud__2019-01-02__2019-01-03.png)
 
 ### hashtag cloud
 GET : `http://localhost:1111/date/{from}/{to}/message/hashtag`
 http://localhost:1111/date/2019-01-01/2019-01-02/message/hashtag
-![](sample/hashtag__2019-01-02__2019-01-03.png)
 
+![](sample/hashtag__2019-01-02__2019-01-03.png)
 
 
 ### Dashboard
@@ -142,20 +150,80 @@ http://localhost:1111/date/2019-01-01/2019-01-02/message/hashtag
 
 - I suggest to access with url start with `http://127.0.0.1:8888`
 
-## System design and Explain
+## System design
 
 This project have 5 container following this list
 
-### social-d-db
-Postgres DB for record processed data
+- `social-d-db` Postgres DB for record processed data
+- `social-d-redis` Redis for queue job
+- `social-d-scheduler` This worker will check csv in raw_data folder every 10 minute
+- `social-d-service` aiohttp main service
+- `social-d-worker` worker for split csv and process data
+- `social-d-jupyter` as a Dashboard
 
-### social-d-redis
-Redis for
+### Request FLOW
+```mermaid
+sequenceDiagram
+participant D As Dashboard
+participant S As Service
+  participant DB As Database
+  
+  participant Dir As Directory
+  
+  
+  D->>S: Request Data
+  S->>DB: fetch data
+  DB-->>S: OK, DATA
+  S-->>D: 200, DATA
 
-### social-d-scheduler 
-### social-d-service
-### social-d-worker  
-### social-d-jupyter 
+  D->>S: Request Wordcloud
+  S->>Dir: Is image Exist ?
+  alt Yes
+  Dir-->>S: Image
+  else No
+  S->>DB: fetch data
+  DB-->>S: OK, DATA
+  S->>S: Generate image
+  S->>Dir:Save image
+  Dir-->>S: Image
+  end
+  S-->>D: 200, Image
+  
+```
+
+### CSV FLOW
+```mermaid
+sequenceDiagram
+  participant DB As Database
+  participant W As Worker
+  participant D As Directory
+  participant R As Redis
+  participant Sc As Scheduler
+  
+  loop Every 10 minute
+  Sc-->>R: Add check new CSV
+  end
+
+  opt Split CSV
+  D->>W: Found new CSV
+  W->>D: Split CSV into small file
+  W->>R: Add process csv job
+  R-->>W: OK
+  W->>DB: Record split file
+  DB-->>W: OK
+  end
+
+  opt Process CSV
+  W->D: OPEN CSV
+  W->>DB: Record
+  DB-->>W:OK
+  end
+
+
+```
 
 ## Improvement
 
+I plan to keep word and hashtag count into dictionary and keep it as day by day. but just realize I can do wordcloud without using that.
+
+And I can do reverse index to keep improve at search time.
